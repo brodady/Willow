@@ -31,6 +31,9 @@ function WillowButton(_label, _style = new WillowStyle(), _onClick = undefined) 
     flexpanel_node_style_set_justify_content(_node, flexpanel_justify.center);
     flexpanel_node_style_set_align_items(_node, flexpanel_align.center);
     flexpanel_node_style_set_gap(_node, flexpanel_gutter.all_gutters, 8);
+    
+    // - CURSOR SETUP
+    setCursor(cr_handpoint);
 
     // - LABEL SETUP
     __textElement = new WillowText(_label + "_label", _label);

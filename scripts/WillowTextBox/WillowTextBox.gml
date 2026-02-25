@@ -503,7 +503,6 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
         if (__layout.width <= 0 || __render.alpha[0] <= 0) return;
         var _sys = __WillowSystem();
         
-        // Enforce strict integer coordinate snapping to prevent sub-pixel font blurring
         var _dx = round(getDrawX());
         var _dy = round(getDrawY());
         var _szW = round(__layout.width);

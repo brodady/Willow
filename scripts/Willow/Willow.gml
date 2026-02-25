@@ -164,7 +164,10 @@ function Willow() constructor {
         var _hovered = __willow_get_top_box(__boxes, _mouse_x, _mouse_y);
 
         if (_hovered != __last_hovered_box) {
-            if (__last_hovered_box != noone) __last_hovered_box.__handleEvent(WILLOW_EVENT.leave);
+            if (__last_hovered_box != noone) {
+                __last_hovered_box.__handleEvent(WILLOW_EVENT.leave);
+                if (_hovered == noone) window_set_cursor(cr_default);
+            }
             if (_hovered != noone) _hovered.__handleEvent(WILLOW_EVENT.enter);
             __last_hovered_box = _hovered;
         }

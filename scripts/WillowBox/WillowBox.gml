@@ -570,36 +570,47 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
         }
 
         // - RESIZE LOGIC
+        var _mx = window_mouse_get_x(); 
+        var _my = window_mouse_get_y();
+
         if ((__resizableH || __resizableV) && !__isResizing) {
-            var _mx = window_mouse_get_x(); var _my = window_mouse_get_y();
             if (device_mouse_check_button_pressed(0, mb_left) && __isMouseInResizeHandle(_mx, _my)) {
                 __isResizing = true;
-                __resizeStartMx = _mx; __resizeStartMy = _my;
+                __resizeStartMx = _mx; 
+                __resizeStartMy = _my;
                 __resizeStartW = (__targetW != undefined) ? __targetW : __layout.width;
                 __resizeStartH = (__targetH != undefined) ? __targetH : __layout.height;
             }
         }
         
         if (__isResizing) {
+            var _resizeCursor = __getCursorStyle(_mx, _my);
+            if (window_get_cursor() != _resizeCursor) window_set_cursor(_resizeCursor);
+
             if (!device_mouse_check_button(0, mb_left)) {
                 __isResizing = false;
+                
+                if (!__eventState.hover) {
+                    window_set_cursor(cr_default);
+                }
             } else {
-                var _mx = window_mouse_get_x(); var _my = window_mouse_get_y();
                 if (__resizableH) __targetW = max(WILLOW_MIN_WIDTH, __resizeStartW + (_mx - __resizeStartMx));
                 if (__resizableV) __targetH = max(WILLOW_MIN_HEIGHT, __resizeStartH + (_my - __resizeStartMy));
                 
                 if (__resizableH) flexpanel_node_style_set_width(__node, __targetW, flexpanel_unit.point);
                 if (__resizableV) flexpanel_node_style_set_height(__node, __targetH, flexpanel_unit.point);
                 
-                var _trunk = self; while (_trunk.__parent != undefined) _trunk = _trunk.__parent;
+                var _trunk = self; 
+                while (_trunk.__parent != undefined) _trunk = _trunk.__parent;
                 flexpanel_calculate_layout(_trunk.getNode(), window_get_width(), window_get_height(), WILLOW_ROOT_DIR);
                 _trunk.updatePosition(true);
             }
             return;
         }
 
+        // Standard Hover Cursor (Only runs if NOT resizing)
         if (__eventState.hover && !mouse_check_button(mb_left)) {
-            var _cur = __getCursorStyle(window_mouse_get_x(), window_mouse_get_y());
+            var _cur = __getCursorStyle(_mx, _my);
             if (window_get_cursor() != _cur) window_set_cursor(_cur);
         }
 
