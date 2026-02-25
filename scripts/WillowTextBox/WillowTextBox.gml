@@ -568,15 +568,45 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
                 }
             }
 
-            var _selCol = __render.select_colour;
-            var _selAlpha = __render.select_alpha * __render.alpha[0];
-            var _minS = min(__inputState.__cursor, __inputState.__selectStart);
-            var _maxS = max(__inputState.__cursor, __inputState.__selectStart);
             var _hasSel = (__inputState.__focus && __inputState.__selectStart != -1 && __inputState.__selectStart != __inputState.__cursor);
+            var _count = array_length(__cachedLines);
+            
+            // LAYER A: Selection Backgrounds
+            if (_hasSel) {
+                var _selCol = __render.select_colour;
+                var _selAlpha = __render.select_alpha * __render.alpha[0];
+                var _minS = min(__inputState.__cursor, __inputState.__selectStart);
+                var _maxS = max(__inputState.__cursor, __inputState.__selectStart);
+                var _highlightRender = { colours: [_selCol, _selCol, _selCol, _selCol], alpha: [_selAlpha, _selAlpha, _selAlpha, _selAlpha], borderColours: [c_white, c_white, c_white, c_white], borderAlpha: [0, 0, 0, 0], borderWidth: 0, rounding: 0 };
+                
+                var _drawYCursor = _textY;
+                var _i = 0; repeat(_count) {
+                    var _line = __cachedLines[_i];
+                    if (_maxS > _line.start_idx - 1 && _minS < _line.end_idx) {
+                        var _masked = __willow_textbox_get_masked_str(self, _line.text);
+                        var _selStart = max(0, _minS - (_line.start_idx - 1));
+                        var _selEnd   = min(string_length(_line.text), _maxS - (_line.start_idx - 1));
+                        var _preText  = string_copy(_masked, 1, _selStart);
+                        var _selText  = string_copy(_masked, _selStart + 1, _selEnd - _selStart);
+                        
+                        var _selX = _interactiveX + __getTextWidth(_preText);
+                        var _selW = __getTextWidth(_selText);
+                        var _selY = __isMultiline ? _drawYCursor : _drawYCursor - (__lineHeight / 2);
+                        
+                        if (_maxS >= _line.end_idx && _line.has_newline && _selW == 0) _selW += 8;
 
-            var _highlightRender = { colours: [_selCol, _selCol, _selCol, _selCol], alpha: [_selAlpha, _selAlpha, _selAlpha, _selAlpha], borderColours: [c_white, c_white, c_white, c_white], borderAlpha: [0, 0, 0, 0], borderWidth: 0, rounding: 0 };
-            var _drawYCursor = _textY;
+                        if (_sys.use_clean_shapes) {
+                            __willow_draw_rectangle_cleanshapes(_selX, _selY, _selW, __lineHeight, _highlightRender);
+                        } else {
+                            __willow_draw_rectangle_native(_selX, _selY, _selW, __lineHeight, _highlightRender);
+                        }
+                    }
+                    _drawYCursor += __lineHeight;
+                    _i++;
+                }
+            }
 
+            // LAYER B: Text Content
             if (!_sys.use_scribble) {
                 draw_set_halign(fa_left); draw_set_valign(_alignV);
                 draw_set_color(_colour); draw_set_alpha(_alpha);
@@ -584,30 +614,10 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
                 if (font_exists(_fidx)) draw_set_font(_fidx);
             }
 
-            var _count = array_length(__cachedLines);
+            var _drawYCursor = _textY;
             var _i = 0; repeat(_count) {
                 var _line = __cachedLines[_i];
                 var _masked = __willow_textbox_get_masked_str(self, _line.text);
-
-                if (_hasSel && _maxS > _line.start_idx - 1 && _minS < _line.end_idx) {
-                    var _selStart = max(0, _minS - (_line.start_idx - 1));
-                    var _selEnd   = min(string_length(_line.text), _maxS - (_line.start_idx - 1));
-                    var _preText  = string_copy(_masked, 1, _selStart);
-                    var _selText  = string_copy(_masked, _selStart + 1, _selEnd - _selStart);
-                    
-                    var _selX = _interactiveX + __getTextWidth(_preText);
-                    var _selW = __getTextWidth(_selText);
-                    var _selY = __isMultiline ? _drawYCursor : _drawYCursor - (__lineHeight / 2);
-                    
-                    // Clean selection: only draw dangling box if line is completely empty.
-                    if (_maxS >= _line.end_idx && _line.has_newline && _selW == 0) _selW += 8;
-
-                    if (_sys.use_clean_shapes) {
-                        __willow_draw_rectangle_cleanshapes(_selX, _selY, _selW, __lineHeight, _highlightRender);
-                    } else {
-                        __willow_draw_rectangle_native(_selX, _selY, _selW, __lineHeight, _highlightRender);
-                    }
-                }
 
                 if (_sys.use_scribble) {
                     scribble(string_replace_all(_masked, "[", "[[")).starting_format(_fontName, _colour).align(fa_left, _alignV).blend(_colour, _alpha).draw(_interactiveX, _drawYCursor);
@@ -617,6 +627,7 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
                 _drawYCursor += __lineHeight;
                 _i++;
             }
+            
             if (!_sys.use_scribble) draw_set_alpha(1);
         }
         
