@@ -132,14 +132,13 @@ build_ui = function() {
     screen_wrapper.contains([login_modal, my_dropdown]);
     ui.compose([screen_wrapper]);
 
-    // Intro Animations using partial structs
-    // Note: alpha requires the [1, 1, 1, 1] array because the render engine evaluates 4 corners
-    login_modal.animateTo({ alpha: [1, 1, 1, 1], scaleX: 1, scaleY: 1 },  0.4, CassetteEase.OutCubic, 0.0);
-    lbl_welcome.animateTo({ alpha: [1, 1, 1, 1], offsetY: 0 }, 0.4, CassetteEase.OutBack,  0.1);
-    txt_username.animateTo({ alpha: [1, 1, 1, 1], scaleX: 1, scaleY: 1 }, 0.4, CassetteEase.OutBack,  0.2);
-    txt_password.animateTo({ alpha: [1, 1, 1, 1], scaleX: 1, scaleY: 1 }, 0.4, CassetteEase.OutBack,  0.3);
-    txt_notes.animateTo({ alpha: [1, 1, 1, 1], scaleX: 1, scaleY: 1 }, 0.4, CassetteEase.OutBack,  0.4); 
-    btn_login.animateTo({ alpha: [1, 1, 1, 1] }, 0.4, CassetteEase.OutBack, 0.5);
+    // Intro animations
+    login_modal.animateTo({ alpha: 1, scaleX: 1, scaleY: 1 },  0.4, CassetteEase.OutCubic, 0.0);
+    lbl_welcome.animateTo({ alpha: 1, offsetY: 0 }, 0.4, CassetteEase.OutBack,  0.1);
+    txt_username.animateTo({ alpha: 1, scaleX: 1, scaleY: 1 }, 0.4, CassetteEase.OutBack,  0.2);
+    txt_password.animateTo({ alpha: 1, scaleX: 1, scaleY: 1 }, 0.4, CassetteEase.OutBack,  0.3);
+    txt_notes.animateTo({ alpha: 1, scaleX: 1, scaleY: 1 }, 0.4, CassetteEase.OutBack,  0.4); 
+    btn_login.animateTo({ alpha: 1 }, 0.4, CassetteEase.OutBack, 0.5);
     #endregion
 };
 

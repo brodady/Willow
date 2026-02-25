@@ -9,7 +9,6 @@ function WillowSprite(_name, _sprite, _style = new WillowStyle()) : WillowBox(_n
     #region INITIALIZATION
 
     // - STYLE CONFIGURATION
-    // Set alpha(0) to make the base box transparent
     __styleDefinition
         .sprite(_sprite)
         .alpha(0); 
@@ -29,7 +28,6 @@ function WillowSprite(_name, _sprite, _style = new WillowStyle()) : WillowBox(_n
 
     __render = __styleDefinition.toRenderStruct();
 
-    // Ensure sprite reference variables exist for the internal renderer
     if (!variable_struct_exists(__render, "sprite_index")) __render.sprite_index = _sprite;
     if (!variable_struct_exists(__render, "image_index")) __render.image_index = 0;
     if (!variable_struct_exists(__render, "image_speed")) __render.image_speed = 1;
@@ -96,7 +94,6 @@ function WillowSprite(_name, _sprite, _style = new WillowStyle()) : WillowBox(_n
         
         var _matrixPushed = __willow_matrix_apply_transform(__render, __layout);
         
-        // Render only the explicit sprite data, bypassing the standard background rectangle
         var _drawX = getDrawX() + (__layout.width / 2);
         var _drawY = getDrawY() + (__layout.height / 2);
         
