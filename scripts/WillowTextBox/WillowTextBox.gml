@@ -34,7 +34,7 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
         __selectMode: WILLOW_SELECT_MODE.REGULAR,
         __maxLength: infinity,
         __blinkTimer: 0,
-        __blinkRate: 45,
+        __blinkRate: 30,
         __navTimer: 0 
     };
     
@@ -549,7 +549,7 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
         if (__text == "" && !__inputState.__focus) {
             var _phDraw = __placeholder;
             if (!__isMultiline) _phDraw = string_replace_all(_phDraw, "\n", "");
-            var _phAlpha = _alpha * 0.5;
+            var _phAlpha = _alpha * 0.6;
 
             if (_sys.use_scribble) {
                 scribble(_phDraw).starting_format(_fontName, _colour).align(fa_left, _alignV).blend(_colour, _phAlpha)

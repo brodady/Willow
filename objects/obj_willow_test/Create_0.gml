@@ -40,18 +40,30 @@ ui.onThemeChange(function(_t) {
     txt_username.animateTo(_inputRenderProps, 0.4, CassetteEase.OutCubic);
     txt_password.animateTo(_inputRenderProps, 0.4, CassetteEase.OutCubic);
     txt_notes.animateTo(_inputRenderProps, 0.4, CassetteEase.OutCubic);
+    btn_login.animateTo({ colours: _colPrimary }, 0.4, CassetteEase.OutCubic);
     
     btn_login.setText("SWITCH THEME: " + string_upper(_t.name));
     
     my_dropdown.__styleDefinition
         .rounding(_t.radius.box)
         .color(_t.color.base_100); 
+    
+    my_dropdown.animateTo(my_dropdown.__styleDefinition, 0);
 
     my_dropdown.__itemStyle
+        .width("100%")      
         .height(_t.size.md)
         .rounding(_t.radius.field)
         .color(_t.color.base_100)
-        .textColor(_t.color.base_content);
+        .textColor(_t.color.base_content)
+        .padding(0, 16)     
+        .justifyContent("flex-start"); 
+
+    my_dropdown.__itemHoverStyle = my_dropdown.__itemStyle.clone()
+        .color(_t.color.primary)
+        .textColor(_t.color.primary_content);
+    
+    my_dropdown.buildItems();
     
     var _dropShake = ui.anim.getTape("dropdown_shake");
     if (_dropShake != undefined) {
@@ -92,6 +104,27 @@ build_ui = function() {
     
     var _styleButton = new WillowStyle()
     .modifiers(WILLOW_MOD.xl).width(320).alpha(0).margin(25, 0).textFont(fnt_open_sans_semibold);
+    
+    var _styleDropContainer = new WillowStyle()
+        .width(220)
+        .padding(8)
+        .alpha(0)
+        .rounding(_t.radius.box)
+        .color(_t.color.base_100);
+
+    var _styleDropItem = new WillowStyle()
+        .width("100%")
+        .height(_t.size.md)
+        .rounding(_t.radius.field)
+        .color(_t.color.base_100)
+        .textColor(_t.color.base_content)
+        .padding(0, 16)
+        .justifyContent("flex-start");
+
+    var _styleDropHover = _styleDropItem.clone()
+        .color(_t.color.primary)
+        .textColor(_t.color.primary_content);
+    
     #endregion
 
     #region LAYOUT
@@ -106,17 +139,22 @@ build_ui = function() {
         .setMultiline(true, false).setResizable(false, true);
 
     btn_login = new ui.Button("SWITCH THEME: " + string_upper(_t.name), _styleButton);
-    btn_login.onClick(method(self, function() {
+    btn_login.onClick(function() {
         themeIndex = (themeIndex + 1) % array_length(themeList);
         ui.setTheme(themeList[themeIndex]); 
-    }));
+    });
+
+    var _dropStyle = new WillowStyle()
+        .width(220) 
+        .padding(8) 
+        .alpha(0);
 
     var _fileOptions = [
-        { label: "New Project", callback: function() { show_debug_message("New"); } },
-        { label: "Save File",   callback: function() { show_debug_message("Saved"); } }
+        { label: "New Project", icon: spr_circle, callback: function() { show_debug_message("New"); } },
+        { label: "Save File",   icon: spr_circle, callback: function() { show_debug_message("Saved"); } }
     ];
 
-    my_dropdown = new WillowDropDown("file_menu", _fileOptions, new WillowStyle(), new WillowStyle());
+    my_dropdown = new WillowDropDown("file_menu", _fileOptions, _styleDropContainer, _styleDropItem, _styleDropHover);
 
     for (var i = 0; i < array_length(my_dropdown.__children); i++) {
         my_dropdown.__children[i].setIcon(spr_circle, 0.5, 0, 0.5, "right");

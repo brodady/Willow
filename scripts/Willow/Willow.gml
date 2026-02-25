@@ -127,8 +127,8 @@ function Willow() constructor {
 
     #region THEME PROPAGATION (INTERNAL)
     static __propagateTheme = function(_box, _theme) {
-        // Post-Order Traversal: Recurse through children FIRST.
-        // This allows complex widgets (like Buttons) to overwrite their children's default themes.
+        if (!is_struct(_box)) return;
+        
         if (variable_struct_exists(_box, "__children")) {
             var _len = array_length(_box.__children);
             for (var i = 0; i < _len; i++) {
@@ -136,8 +136,7 @@ function Willow() constructor {
             }
         }
 
-        // Apply theme to the parent LAST
-        if (variable_struct_exists(_box, "__applyTheme")) {
+        if (variable_struct_exists(_box, "__applyTheme") && is_callable(_box.__applyTheme)) {
             _box.__applyTheme(_theme);
         }
     };
@@ -172,7 +171,12 @@ function Willow() constructor {
 
         if (_hovered != noone) {
             _hovered.__handleEvent(WILLOW_EVENT.hover);
-            if (device_mouse_check_button_pressed(0, mb_left)) _hovered.__handleEvent(WILLOW_EVENT.click);
+            if (device_mouse_check_button_pressed(0, mb_left)) {
+                _hovered.__handleEvent(WILLOW_EVENT.click);
+            }
+            if (device_mouse_check_button_pressed(0, mb_right)) {
+                _hovered.__handleEvent(WILLOW_EVENT.rightClick);
+            }
             
             if (mouse_wheel_up()) _hovered.__handleEvent(WILLOW_EVENT.scrollUp);
             if (mouse_wheel_down()) _hovered.__handleEvent(WILLOW_EVENT.scrollDown);
