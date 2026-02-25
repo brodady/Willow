@@ -4,7 +4,7 @@
 /// @param   {String} [_placeholder]
 /// @param   {Struct.WillowStyle} [_style]
 /// @return  {Struct.WillowTextBox} self
-function WillowTextBox(_name, _placeholder = "Enter text...", _style = undefined) : WillowBox(_name, _style) constructor {
+function WillowTextBox(_name, _placeholder = "Enter text...", _style = new WillowStyle()) : WillowBox(_name, _style) constructor {
 
     #region INTERNAL VARIABLES
     
@@ -31,6 +31,7 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = undefined
         __isDragging: false,
         __cursor: 0,
         __selectStart: -1,
+        __selectMode: WILLOW_SELECT_MODE.REGULAR,
         __maxLength: infinity,
         __blinkTimer: 0,
         __blinkRate: 45,
@@ -217,15 +218,36 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = undefined
         if (!device_mouse_check_button(0, mb_left)) {
             if (__inputState.__isDragging && !__eventState.hover && window_get_cursor() != cr_default) window_set_cursor(cr_default);
             __inputState.__isDragging = false;
+            __inputState.__selectMode = WILLOW_SELECT_MODE.REGULAR;
         }
 
         if (!__inputState.__focus) return;
         
         if (__inputState.__isDragging) {
-            __inputState.__cursor = __getCursorIndexFromMouse();
+            var _mouseIdx = __getCursorIndexFromMouse();
+            
+            if (__inputState.__selectMode == WILLOW_SELECT_MODE.WORD) {
+                var _wordStart = _mouseIdx;
+                while (_wordStart > 0 && !__willow_is_boundary(string_char_at(__text, _wordStart))) _wordStart--;
+                
+                var _wordEnd = _mouseIdx + 1;
+                var _len = string_length(__text);
+                while (_wordEnd <= _len && !__willow_is_boundary(string_char_at(__text, _wordEnd))) _wordEnd++;
+                _wordEnd -= 1;
+        
+                if (_mouseIdx < __inputState.__pivotStart) {
+                    __inputState.__cursor = _wordStart;
+                    __inputState.__selectStart = __inputState.__pivotEnd;
+                } else {
+                    __inputState.__cursor = _wordEnd;
+                    __inputState.__selectStart = __inputState.__pivotStart;
+                }
+            } else {
+                __inputState.__cursor = _mouseIdx;
+            }
+            
             __scrollToCursor();
             __inputState.__blinkTimer = 0;
-            if (window_get_cursor() != cr_beam) window_set_cursor(cr_beam);
         }
         
         __inputState.__blinkTimer = (__inputState.__blinkTimer + 1) % (__inputState.__blinkRate * 2);
@@ -625,6 +647,7 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = undefined
         
         __inputState.__focus = true; 
         __inputState.__isDragging = true; 
+        __inputState.__selectMode = WILLOW_SELECT_MODE.REGULAR;
         keyboard_string = __text;
         
         var _targetIdx = __getCursorIndexFromMouse();
@@ -640,17 +663,23 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = undefined
     });
 
     onDoubleClick(function() {
-        if (__isResizing || __isMouseInResizeHandle(window_mouse_get_x(), window_mouse_get_y()) || __text == "") return;
+        if (__isResizing || __text == "") return;
         var _idx = __getCursorIndexFromMouse();
+        
+        // Find word boundaries
         var _start = _idx;
         while (_start > 0 && !__willow_is_boundary(string_char_at(__text, _start))) _start--;
         var _end = _idx + 1;
         var _len = string_length(__text);
         while (_end <= _len && !__willow_is_boundary(string_char_at(__text, _end))) _end++;
         
+        __inputState.__selectMode = WILLOW_SELECT_MODE.WORD;
+        __inputState.__pivotStart = _start;
+        __inputState.__pivotEnd = _end - 1;
+        
         __inputState.__selectStart = _start; 
         __inputState.__cursor = _end - 1; 
-        __inputState.__blinkTimer = 0;
+        __inputState.__isDragging = true;
     });
     
     #endregion

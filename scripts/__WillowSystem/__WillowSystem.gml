@@ -56,4 +56,10 @@ enum WILLOW_ANIM {
 enum WILLOW_MOD {
     xs, sm, md, lg, xl, wide, block, square, circle
 }
+
+enum WILLOW_SELECT_MODE {
+    REGULAR,
+    WORD,
+    LINE
+}
 #endregion

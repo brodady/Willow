@@ -37,30 +37,30 @@ function __willow_update_textbox_cache(_box) {
     var _startIdx = 1;
     var _lastSpaceIdx = -1;
 
-    for (var i = 1; i <= _textLen; i++) {
-        var _char = string_char_at(_box.__text, i);
+    for (var _i = 1; _i <= _textLen; _i++) {
+        var _char = string_char_at(_box.__text, _i);
 
         if (_char == "\n") {
-            var _lineStr = string_copy(_box.__text, _startIdx, i - _startIdx);
-            array_push(_box.__cachedLines, { text: _lineStr, start_idx: _startIdx, end_idx: i, has_newline: true });
-            _startIdx = i + 1; _lastSpaceIdx = -1; continue;
+            var _lineStr = string_copy(_box.__text, _startIdx, _i - _startIdx);
+            array_push(_box.__cachedLines, { text: _lineStr, start_idx: _startIdx, end_idx: _i, has_newline: true });
+            _startIdx = _i + 1; _lastSpaceIdx = -1; continue;
         }
         
-        if (_char == " ") _lastSpaceIdx = i;
+        if (_char == " ") _lastSpaceIdx = _i;
 
         if (_box.__wordWrap) {
-            var _currentSub = string_copy(_box.__text, _startIdx, i - _startIdx + 1);
+            var _currentSub = string_copy(_box.__text, _startIdx, _i - _startIdx + 1);
             var _masked = __willow_textbox_get_masked_str(_box, _currentSub);
 
-            if (_box.__getTextWidth(_masked) > _maxW && _startIdx < i) {
+            if (_box.__getTextWidth(_masked) > _maxW && _startIdx < _i) {
                 if (_lastSpaceIdx != -1 && _lastSpaceIdx >= _startIdx) {
                     var _lineStr = string_copy(_box.__text, _startIdx, _lastSpaceIdx - _startIdx);
                     array_push(_box.__cachedLines, { text: _lineStr, start_idx: _startIdx, end_idx: _lastSpaceIdx, has_newline: false });
-                    i = _lastSpaceIdx; _startIdx = i + 1; _lastSpaceIdx = -1;
+                    _i = _lastSpaceIdx; _startIdx = _i + 1; _lastSpaceIdx = -1;
                 } else {
-                    var _lineStr = string_copy(_box.__text, _startIdx, i - _startIdx);
-                    array_push(_box.__cachedLines, { text: _lineStr, start_idx: _startIdx, end_idx: i - 1, has_newline: false });
-                    i--; _startIdx = i + 1; _lastSpaceIdx = -1;
+                    var _lineStr = string_copy(_box.__text, _startIdx, _i - _startIdx);
+                    array_push(_box.__cachedLines, { text: _lineStr, start_idx: _startIdx, end_idx: _i - 1, has_newline: false });
+                    _i--; _startIdx = _i + 1; _lastSpaceIdx = -1;
                 }
             }
         }
@@ -77,13 +77,13 @@ function __willow_textbox_get_cursor_coords(_box, _index) {
     __willow_update_textbox_cache(_box);
     var _count = array_length(_box.__cachedLines);
     
-    for (var i = 0; i < _count; i++) {
-        var _l = _box.__cachedLines[i];
+    for (var _i = 0; _i < _count; _i++) {
+        var _l = _box.__cachedLines[_i];
         if (_index >= _l.start_idx - 1 && _index < _l.end_idx) {
             var _charOffset = _index - (_l.start_idx - 1);
             var _sub = string_copy(_l.text, 1, _charOffset);
             var _masked = __willow_textbox_get_masked_str(_box, _sub);
-            return { x: _box.__getTextWidth(_masked) + _box.__getPrefixOffset(), y: i * _box.__lineHeight, line_idx: i, line_data: _l };
+            return { x: _box.__getTextWidth(_masked) + _box.__getPrefixOffset(), y: _i * _box.__lineHeight, line_idx: _i, line_data: _l };
         }
     }
     

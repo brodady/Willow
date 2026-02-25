@@ -67,14 +67,16 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
     /// @desc    Calculates the local X coordinate including offsets and scrolling.
     /// @return  {Real}
     static getDrawX = function() { 
-        return __layout.left + __render.offsetX - (variable_struct_exists(__render, "scroll_x") ? __render.scroll_x : 0); 
+        var _x = __layout.left + __render.offsetX - (variable_struct_exists(__render, "scroll_x") ? __render.scroll_x : 0); 
+        return round(_x);
     };
 
     /// @func    getDrawY()
     /// @desc    Calculates the local Y coordinate including offsets and scrolling.
     /// @return  {Real}
     static getDrawY = function() {
-        return __layout.top + __render.offsetY - (variable_struct_exists(__render, "scroll_y") ? __render.scroll_y : 0); 
+        var _y = __layout.top + __render.offsetY - (variable_struct_exists(__render, "scroll_y") ? __render.scroll_y : 0);
+        return round(_y);
     };
 
     /// @func    alwaysOnTop()
