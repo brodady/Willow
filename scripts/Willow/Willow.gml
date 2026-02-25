@@ -194,13 +194,37 @@ function Willow() constructor {
     
     /// @desc Renders the UI hierarchy. Call once per Draw GUI event.
     static draw = function() {
-        var _depth_prev = gpu_get_depth();
         var _sys = __WillowSystem();
+        
+        // Setup UI Surface
+        var _gw = display_get_gui_width();
+        var _gh = display_get_gui_height();
+        
+        if (!surface_exists(_sys.ui_surface)) {
+            _sys.ui_surface = surface_create(_gw, _gh);
+        } else if (surface_get_width(_sys.ui_surface) != _gw || surface_get_height(_sys.ui_surface) != _gh) {
+            surface_resize(_sys.ui_surface, round(_gw), round(_gh));
+        }
+        
+        surface_set_target(_sys.ui_surface);
+        
+        // Clear Color and Stencil Buffers
+        draw_clear_alpha(c_black, 0);
+        draw_clear_stencil(0);
+        
+        // CRITICAL FIX: Disable Depth Testing and Writing. 
+        // This prevents PASS 2 masks from being rejected by PASS 1 backgrounds sharing the same Z-depth.
+        var _depth_prev = gpu_get_depth();
+        var _ztest_prev = gpu_get_ztestenable();
+        var _zwrite_prev = gpu_get_zwriteenable();
+        gpu_set_ztestenable(false);
+        gpu_set_zwriteenable(false);
+        
         var _prev_cp = draw_get_circle_precision();
         draw_set_circle_precision(WILLOW_CIRC_RES);
-
+    
         var _len = array_length(__boxes);
-
+    
         // PASS 1: Standard background and component pass
         for (var i = 0; i < _len; i++) {
             var _box = __boxes[i];
@@ -216,7 +240,7 @@ function Willow() constructor {
                 _box.drawText();
             }
         }
-
+    
         // PASS 3: Overlay pass for high-depth elements (Modals, Dropdowns)
         var _ol = _sys.overlays;
         var _ol_len = array_length(_ol);
@@ -227,9 +251,18 @@ function Willow() constructor {
                 if (variable_struct_exists(_item, "drawText")) _item.drawText();
             }
         }
-
+    
+        // Restore GPU State
         gpu_set_depth(_depth_prev);
+        gpu_set_ztestenable(_ztest_prev);
+        gpu_set_zwriteenable(_zwrite_prev);
         draw_set_circle_precision(_prev_cp);
+        surface_reset_target();
+        
+        // Draw UI Surface using premultiplied alpha rules to prevent glowing halos
+        gpu_set_blendmode_ext(bm_one, bm_inv_src_alpha);
+        draw_surface(_sys.ui_surface, 0, 0);
+        gpu_set_blendmode(bm_normal);
     };
 
     static destroy = function() {

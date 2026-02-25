@@ -405,7 +405,6 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
                     if (!__isMultiline) {
                         while (__inputState.__cursor > 0 && (string_char_at(__text, __inputState.__cursor) == "\n" || string_char_at(__text, __inputState.__cursor) == "\r")) __inputState.__cursor--;
                     } else if (_shift) {
-                        // Skip newline visually when holding shift
                         if (__inputState.__cursor > 0 && string_char_at(__text, __inputState.__cursor) == "\n") {
                             __inputState.__cursor = max(0, __inputState.__cursor - 1);
                         }
@@ -416,7 +415,6 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
                     if (!__isMultiline) {
                         while (__inputState.__cursor <= string_length(__text) && __inputState.__cursor > 0 && (string_char_at(__text, __inputState.__cursor) == "\n" || string_char_at(__text, __inputState.__cursor) == "\r")) __inputState.__cursor++;
                     } else if (_shift) {
-                        // Skip newline visually when holding shift
                         if (__inputState.__cursor <= string_length(__text) && __inputState.__cursor > 0 && string_char_at(__text, __inputState.__cursor) == "\n") {
                             __inputState.__cursor = min(string_length(__text), __inputState.__cursor + 1);
                         }
@@ -504,22 +502,24 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
     static drawText = function() {
         if (__layout.width <= 0 || __render.alpha[0] <= 0) return;
         var _sys = __WillowSystem();
-        var _dx = getDrawX();
-        var _dy = getDrawY();
+        
+        // Enforce strict integer coordinate snapping to prevent sub-pixel font blurring
+        var _dx = round(getDrawX());
+        var _dy = round(getDrawY());
+        var _szW = round(__layout.width);
+        var _szH = round(__layout.height);
+        
         __willow_update_textbox_cache(self);
 
-        // - FOCUS RING & SETUP
+        // - FOCUS RING (Drawn outside the stencil mask)
         if (__inputState.__focus) {
             var _focusGap = 1;
             var _focusThick = 2;
-            var _oc = __render.outline_colour;
-            var _oa = __render.alpha[0] * __render.outline_alpha;
+            var _oc = variable_struct_exists(__render, "outline_colour") ? __render.outline_colour : _sys.theme.color.primary;
+            var _oa = __render.alpha[0] * (variable_struct_exists(__render, "outline_alpha") ? __render.outline_alpha : 0.6);
             
-            __willow_draw_focus_ring(_dx, _dy, __layout.width, __layout.height, __render.rounding, _focusThick, _focusGap, _oc, _oa);
+            __willow_draw_focus_ring(_dx, _dy, _szW, _szH, __render.rounding, _focusThick, _focusGap, _oc, _oa);
         }
-
-        var _prevScissor = gpu_get_scissor();
-        __willow_gpu_set_scissor_intersect(_dx, _dy, __layout.width, __layout.height);
 
         var _font = __render[$ "text_font"] ?? _sys.default_font;
         var _fontName = is_string(_font) ? _font : font_get_name(_font);
@@ -528,11 +528,22 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
 
         var _roundingOffset = max(10, __render.rounding * 0.5);
         var _alignV = __isMultiline ? fa_top : fa_middle;
-        var _textX = _dx + _roundingOffset - __scrollX;
-        var _textY = __isMultiline ? (_dy + _roundingOffset - __scrollY) : (_dy + (__layout.height / 2));
+        var _textX = round(_dx + _roundingOffset - __scrollX);
+        var _textY = round(__isMultiline ? (_dy + _roundingOffset - __scrollY) : (_dy + (_szH / 2)));
         var _interactiveX = _textX + __getPrefixOffset();
 
+        // APPLY MATRIX
         var _matrixPushed = __willow_matrix_apply_transform(__render, __layout);
+        
+        // MASK
+        var _clipInset = 2; 
+        var _prevMask = __willow_mask_push(
+            _dx + _clipInset, 
+            _dy + _clipInset, 
+            max(0, _szW - (_clipInset * 2)), 
+            max(0, _szH - (_clipInset * 2)), 
+            max(0, __render.rounding - _clipInset)
+        );
 
         // - PASS 1: PLACEHOLDER
         if (__text == "" && !__inputState.__focus) {
@@ -542,13 +553,13 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
 
             if (_sys.use_scribble) {
                 scribble(_phDraw).starting_format(_fontName, _colour).align(fa_left, _alignV).blend(_colour, _phAlpha)
-                    .wrap(__isMultiline ? (__layout.width - (_roundingOffset * 2)) : -1).draw(_textX, _textY);
+                    .wrap(__isMultiline ? (_szW - (_roundingOffset * 2)) : -1).draw(_textX, _textY);
             } else {
                 draw_set_halign(fa_left); draw_set_valign(_alignV);
                 draw_set_color(_colour); draw_set_alpha(_phAlpha);
                 var _fidx = is_string(_font) ? asset_get_index(_font) : _font;
                 if (font_exists(_fidx)) draw_set_font(_fidx);
-                draw_text_ext(_textX, _textY, _phDraw, __lineHeight, __isMultiline ? (__layout.width - (_roundingOffset * 2)) : -1);
+                draw_text_ext(_textX, _textY, _phDraw, __lineHeight, __isMultiline ? (_szW - (_roundingOffset * 2)) : -1);
             }
         }
         
@@ -627,7 +638,6 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
                 _drawYCursor += __lineHeight;
                 _i++;
             }
-            
             if (!_sys.use_scribble) draw_set_alpha(1);
         }
         
@@ -641,10 +651,22 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
             else draw_line_width_color(_cx, _cy - (__lineHeight / 2), _cx, _cy + (__lineHeight / 2), 2, _colour, _colour);
         }
 
+        // POP STENCIL MASK
+        __willow_mask_pop(
+            _dx + _clipInset, 
+            _dy + _clipInset, 
+            max(0, _szW - (_clipInset * 2)), 
+            max(0, _szH - (_clipInset * 2)), 
+            max(0, __render.rounding - _clipInset),
+            _prevMask
+        );
+
+        // RESTORE MATRIX
         if (_matrixPushed) __willow_matrix_restore_transform();
-        gpu_set_scissor(_prevScissor);
+        
         draw_set_alpha(1);
 
+        // Render accessories outside of the clipping boundaries
         __willow_draw_scrollbars(self);
         __willow_draw_resize_handle(self);
     };

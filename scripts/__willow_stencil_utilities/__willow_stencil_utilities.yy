@@ -1,9 +1,9 @@
 {
   "$GMScript":"v1",
-  "%Name":"__willow_gpu_set_scissor_intersect",
+  "%Name":"__willow_stencil_utilities",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"__willow_gpu_set_scissor_intersect",
+  "name":"__willow_stencil_utilities",
   "parent":{
     "name":"Utilities",
     "path":"folders/Willow/(System)/Utilities.yy",

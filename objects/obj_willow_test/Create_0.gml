@@ -74,7 +74,7 @@ build_ui = function() {
     #region STYLES
     var _styleWrapper = new WillowStyle().width("100%").height("100%").justifyContent("center").alignItems("center").alpha(0);
 
-    var _styleModal = new WillowStyle().width(420).minWidth(420).height(480).minHeight(480)
+    var _styleModal = new WillowStyle().width(420).minWidth(420).height(480)
         .rounding(_t.radius.box).color(_t.color.base_100)
         .justifyContent("flex-start").alignItems("center").flexDirection("column")
         .clipContents(true).padding(40)

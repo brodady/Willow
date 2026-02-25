@@ -166,16 +166,15 @@ function WillowButton(_label, _style = new WillowStyle(), _onClick = undefined) 
         __hoverAlpha = lerp(__hoverAlpha, _targetAlpha, 0.2);
     };
     
-    /// @ignore OVERRIDE: Handle visual overlays before scissoring children.
+    /// @ignore OVERRIDE: Handle visual overlays before masking children.
     static drawText = function() {
-        var _dx = getDrawX();
-        var _dy = getDrawY();
+        var _dx = round(getDrawX());
+        var _dy = round(getDrawY());
         var _sz = __getRenderSize();
-        var _realW = _sz.w * __render.scaleX;
-        var _realH = _sz.h * __render.scaleY;
-        var _realX = _dx + (_sz.w - _realW) / 2;
-        var _realY = _dy + (_sz.h - _realH) / 2;
-        var _realR = __render.rounding * min(__render.scaleX, __render.scaleY);
+        var _szW = round(_sz.w);
+        var _szH = round(_sz.h);
+        
+        var _matrixPushed = __willow_matrix_apply_transform(__render, __layout);
         
         // - RENDER FOCUS RING
         if (__inputState.__focus) {
@@ -184,7 +183,7 @@ function WillowButton(_label, _style = new WillowStyle(), _onClick = undefined) 
             var _oc = variable_struct_exists(__render, "outline_colour") ? __render.outline_colour : __WillowSystem().theme.color.primary;
             var _oa = __render.alpha[0] * (variable_struct_exists(__render, "outline_alpha") ? __render.outline_alpha : 0.6);
             
-            __willow_draw_focus_ring(_realX, _realY, _realW, _realH, _realR, _focusThick, _focusGap, _oc, _oa);
+            __willow_draw_focus_ring(_dx, _dy, _szW, _szH, __render.rounding, _focusThick, _focusGap, _oc, _oa);
         }
 
         // - RENDER HOVER HIGHLIGHT
@@ -193,26 +192,36 @@ function WillowButton(_label, _style = new WillowStyle(), _onClick = undefined) 
             draw_set_alpha(__hoverAlpha * __render.alpha[0]);
             
             if (__WillowSystem().use_clean_shapes) {
-                CleanRectangle(_realX, _realY, _realX + _realW, _realY + _realH)
-                    .Rounding(_realR)
+                CleanRectangle(_dx, _dy, _dx + _szW, _dy + _szH)
+                    .Rounding(__render.rounding)
                     .Blend(_c, draw_get_alpha())
                     .Draw();
             } else {
                 draw_set_colour(_c);
-                draw_roundrect_ext(_realX, _realY, _realX + _realW, _realY + _realH, _realR, _realR, false);
+                if (__render.rounding > 0) draw_roundrect_ext(_dx, _dy, _dx + _szW - 1, _dy + _szH - 1, __render.rounding, __render.rounding, false);
+                else draw_rectangle(_dx, _dy, _dx + _szW - 1, _dy + _szH - 1, false);
             }
             
             draw_set_alpha(1);
         }
         
-        // - CASCADE CHILDREN (Apply Scissor natively for internal labels/icons)
+        // - CASCADE CHILDREN (Apply Mask natively for internal labels/icons)
         var _numChildren = array_length(__children);
         var _needsClip = (__maxScrollX > 0 || __maxScrollY > 0 || (variable_struct_exists(__styleDefinition.struct, "clipContent") && __styleDefinition.struct.clipContent));
-        var _prevScissor = gpu_get_scissor();
+        var _prevMask = 0;
+        var _clipInset = 2; 
         
         if (_needsClip && _numChildren > 0) {
-            __willow_gpu_set_scissor_intersect(_realX, _realY, _realW, _realH);
+            _prevMask = __willow_mask_push(
+                _dx + _clipInset, 
+                _dy + _clipInset, 
+                max(0, _szW - (_clipInset * 2)), 
+                max(0, _szH - (_clipInset * 2)), 
+                max(0, __render.rounding - _clipInset)
+            );
         }
+        
+        if (_matrixPushed) __willow_matrix_restore_transform();
 
         if (_numChildren > 0) {
             var _i = 0; repeat(_numChildren) {
@@ -226,7 +235,18 @@ function WillowButton(_label, _style = new WillowStyle(), _onClick = undefined) 
             }
         }
         
-        if (_needsClip && _numChildren > 0) gpu_set_scissor(_prevScissor);
+        if (_needsClip && _numChildren > 0) {
+            if (_matrixPushed) __willow_matrix_apply_transform(__render, __layout);
+            __willow_mask_pop(
+                _dx + _clipInset, 
+                _dy + _clipInset, 
+                max(0, _szW - (_clipInset * 2)), 
+                max(0, _szH - (_clipInset * 2)), 
+                max(0, __render.rounding - _clipInset), 
+                _prevMask
+            );
+            if (_matrixPushed) __willow_matrix_restore_transform();
+        }
     };
     
     #endregion

@@ -635,14 +635,18 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
         }
 
         var _clip = (__maxScrollX > 0 || __maxScrollY > 0 || (variable_struct_exists(__styleDefinition.struct, "clipContent") && __styleDefinition.struct.clipContent));
-        var _prevScissor = gpu_get_scissor();
+        var _prevMask = 0;
+        var _clipInset = 2; // Default inward clipping margin
         
+        // Push the stencil mask while the matrix is active, slightly inset to prevent anti-aliasing edge bleed.
         if (_clip && array_length(__children) > 0) {
-            var _realW = _sz.w * __render.scaleX;
-            var _realH = _sz.h * __render.scaleY;
-            var _realX = _dx + (_sz.w - _realW) / 2;
-            var _realY = _dy + (_sz.h - _realH) / 2;
-            __willow_gpu_set_scissor_intersect(_realX, _realY, _realW, _realH);
+            _prevMask = __willow_mask_push(
+                _dx + _clipInset, 
+                _dy + _clipInset, 
+                max(0, _sz.w - (_clipInset * 2)), 
+                max(0, _sz.h - (_clipInset * 2)), 
+                max(0, __render.rounding - _clipInset)
+            );
         }
 
         if (variable_struct_exists(self, "drawComponent")) drawComponent();
@@ -661,7 +665,19 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
             _i++;
         }
 
-        if (_clip && _len > 0) gpu_set_scissor(_prevScissor);
+        // Restore the matrix explicitly to erase the mask at the exact same coordinates
+        if (_clip && _len > 0) {
+            if (_matrixPushed) __willow_matrix_apply_transform(__render, __layout);
+            __willow_mask_pop(
+                _dx + _clipInset, 
+                _dy + _clipInset, 
+                max(0, _sz.w - (_clipInset * 2)), 
+                max(0, _sz.h - (_clipInset * 2)), 
+                max(0, __render.rounding - _clipInset), 
+                _prevMask
+            );
+            if (_matrixPushed) __willow_matrix_restore_transform();
+        }
     };
 
     /// @func    drawText()
@@ -694,16 +710,23 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
         gpu_set_depth(_depthPrev);
 
         var _needsClip = (__maxScrollX > 0 || __maxScrollY > 0 || (variable_struct_exists(__styleDefinition.struct, "clipContent") && __styleDefinition.struct.clipContent));
-        var _prevScissor = gpu_get_scissor();
+        var _prevMask = 0;
+        var _clipInset = 2; // Default inward clipping margin
+        
+        var _matrixPushed = __willow_matrix_apply_transform(__render, __layout);
         
         if (_needsClip && _numChildren > 0) {
             var _sz = __getRenderSize();
-            var _realW = _sz.w * __render.scaleX;
-            var _realH = _sz.h * __render.scaleY;
-            var _realX = _drawX + (_sz.w - _realW) / 2;
-            var _realY = _drawY + (_sz.h - _realH) / 2;
-            __willow_gpu_set_scissor_intersect(_realX, _realY, _realW, _realH);
+            _prevMask = __willow_mask_push(
+                _drawX + _clipInset, 
+                _drawY + _clipInset, 
+                max(0, _sz.w - (_clipInset * 2)), 
+                max(0, _sz.h - (_clipInset * 2)), 
+                max(0, __render.rounding - _clipInset)
+            );
         }
+        
+        if (_matrixPushed) __willow_matrix_restore_transform();
 
         if (_numChildren > 0) {
             var _i = 0; repeat(_numChildren) {
@@ -717,7 +740,18 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
             }
         }
         
-        if (_needsClip && _numChildren > 0) gpu_set_scissor(_prevScissor);
+        if (_needsClip && _numChildren > 0) {
+            if (_matrixPushed) __willow_matrix_apply_transform(__render, __layout);
+            __willow_mask_pop(
+                _drawX + _clipInset, 
+                _drawY + _clipInset, 
+                max(0, _sz.w - (_clipInset * 2)), 
+                max(0, _sz.h - (_clipInset * 2)), 
+                max(0, __render.rounding - _clipInset), 
+                _prevMask
+            );
+            if (_matrixPushed) __willow_matrix_restore_transform();
+        }
     };
     
     #endregion

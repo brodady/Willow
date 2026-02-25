@@ -7,6 +7,7 @@ function __WillowSystem() {
         deck: undefined,
         theme: undefined,
         overlays: [],
+        ui_surface: undefined,
         use_clean_shapes: false,
         use_scribble: false,
         debug_mode: false,

@@ -12,8 +12,7 @@
 /// @return  {Undefined}
 function __willow_draw_focus_ring(_x, _y, _w, _h, _rounding, _thickness, _gap, _color, _alpha) {
     var _sys = __WillowSystem();
-
-    // This prevents massive "pill-shape" radii (like 999) from mathematically inverting the corner arcs.
+    
     var _clampedRounding = min(_rounding, min(_w, _h) / 2);
     
     var _outX1 = _x - _gap - _thickness;
@@ -29,37 +28,68 @@ function __willow_draw_focus_ring(_x, _y, _w, _h, _rounding, _thickness, _gap, _
     var _inR  = _clampedRounding + _gap;
 
     if (_sys.use_clean_shapes) {
-        // CleanShapes handles hollow SDF borders natively
+        // CleanShapes natively handles hollow SDF borders without destroying surface alpha
         CleanRectangle(_outX1, _outY1, _outX2, _outY2)
             .Blend(c_white, 0)
             .Border(_thickness, _color, _alpha)
             .Rounding(_outR)
             .Draw();
     } else {
-        // Make a border by masking rectangles
-        gpu_set_colorwriteenable(false, false, false, true);
+        // --- HARDWARE STENCIL FOCUS RING (Safe for UI Surfaces) ---
+        var _prevAlpha = draw_get_alpha();
+        var _prevColor = draw_get_color();
+        
+        // 1. Get current stencil level (to respect existing masks)
+        var _ref = 0;
+        if (gpu_get_stencil_enable()) _ref = gpu_get_stencil_ref();
+        else {
+            gpu_set_stencil_enable(true);
+            gpu_set_stencil_ref(0);
+        }
 
-        gpu_set_blendmode(bm_subtract);
+        // 2. MASK OUT THE INNER GAP
+        // We draw the invisible inner gap and increment the stencil buffer to protect those pixels.
+        gpu_set_colorwriteenable(false, false, false, false);
+        gpu_set_stencil_func(cmpfunc_equal);
+        gpu_set_stencil_ref(_ref);
+        gpu_set_stencil_pass(stencilop_incr);
+        
         draw_set_alpha(1);
-        draw_rectangle(_outX1, _outY1, _outX2, _outY2, false);
+        if (_inR > 0) draw_roundrect_ext(_inX1, _inY1, _inX2 - 1, _inY2 - 1, _inR, _inR, false);
+        else draw_rectangle(_inX1, _inY1, _inX2 - 1, _inY2 - 1, false);
 
-        gpu_set_blendmode(bm_add);
-        draw_set_alpha(_alpha);
-        draw_roundrect_ext(_outX1, _outY1, _outX2, _outY2, _outR, _outR, false);
-
-        gpu_set_blendmode(bm_subtract);
-        draw_set_alpha(1);
-        draw_roundrect_ext(_inX1, _inY1, _inX2, _inY2, _inR, _inR, false);
-
+        // 3. DRAW OUTER RING 
+        // We draw the full outer boundary, but because cmpfunc_equal requires the 
+        // stencil to match _ref, it is rejected inside the gap we just protected.
         gpu_set_colorwriteenable(true, true, true, true);
-        gpu_set_blendmode_ext(bm_dest_alpha, bm_inv_dest_alpha);
-
+        gpu_set_stencil_func(cmpfunc_equal);
+        gpu_set_stencil_ref(_ref);
+        gpu_set_stencil_pass(stencilop_keep);
+        
         draw_set_color(_color);
-        draw_set_alpha(1); 
-        draw_rectangle(_outX1, _outY1, _outX2, _outY2, false); 
+        draw_set_alpha(_alpha);
+        if (_outR > 0) draw_roundrect_ext(_outX1, _outY1, _outX2 - 1, _outY2 - 1, _outR, _outR, false);
+        else draw_rectangle(_outX1, _outY1, _outX2 - 1, _outY2 - 1, false);
 
-        gpu_set_blendmode(bm_normal);
-        draw_set_color(c_white);
+        // 4. CLEAN UP THE MASK
+        // We redraw the inner gap, decrementing the stencil back to its previous state.
+        gpu_set_colorwriteenable(false, false, false, false);
+        gpu_set_stencil_func(cmpfunc_equal);
+        gpu_set_stencil_ref(_ref + 1);
+        gpu_set_stencil_pass(stencilop_decr);
+        
         draw_set_alpha(1);
+        if (_inR > 0) draw_roundrect_ext(_inX1, _inY1, _inX2 - 1, _inY2 - 1, _inR, _inR, false);
+        else draw_rectangle(_inX1, _inY1, _inX2 - 1, _inY2 - 1, false);
+
+        // 5. RESTORE STATE
+        gpu_set_colorwriteenable(true, true, true, true);
+        gpu_set_stencil_func(cmpfunc_equal);
+        gpu_set_stencil_ref(_ref);
+        gpu_set_stencil_pass(stencilop_keep);
+        
+        draw_set_color(_prevColor);
+        draw_set_alpha(_prevAlpha);
+        if (_ref == 0) gpu_set_stencil_enable(false);
     }
 }
