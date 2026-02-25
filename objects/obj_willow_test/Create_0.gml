@@ -102,7 +102,7 @@ build_ui = function() {
     txt_username = new ui.TextBox("user", "Username", _styleInput.clone());
     txt_password = new ui.TextBox("pass", "Password", _styleInput.clone()).setReplacementChar("*");
     
-    txt_notes = new ui.TextBox("notes", "Tell us about yourself...", _styleInput.clone().height(120))
+    txt_notes = new ui.TextBox("notes", "Write something...", _styleInput.clone().height(120))
         .setMultiline(true, false).setResizable(false, true);
 
     btn_login = new ui.Button("SWITCH THEME: " + string_upper(_t.name), _styleButton);
