@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteMixtape_IsInfinite",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteMixtape_IsInfinite",
+  "parent":{
+    "name":"Getters",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteMixtape/Getters.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

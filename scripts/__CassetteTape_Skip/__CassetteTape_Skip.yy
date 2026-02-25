@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteTape_Skip",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteTape_Skip",
+  "parent":{
+    "name":"Controls",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteTape/Controls.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

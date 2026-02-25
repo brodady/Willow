@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"WillowDropDown",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"WillowDropDown",
+  "parent":{
+    "name":"Components",
+    "path":"folders/Willow/Components.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

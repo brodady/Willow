@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteDeck_isPlaying",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteDeck_isPlaying",
+  "parent":{
+    "name":"Getters",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteDeck/Getters.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

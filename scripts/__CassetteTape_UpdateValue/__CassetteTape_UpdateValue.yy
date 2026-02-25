@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteTape_UpdateValue",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteTape_UpdateValue",
+  "parent":{
+    "name":"Logic",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteTape/Logic.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

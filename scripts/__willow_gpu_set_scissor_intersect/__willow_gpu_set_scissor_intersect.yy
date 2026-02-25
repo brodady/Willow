@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__willow_gpu_set_scissor_intersect",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__willow_gpu_set_scissor_intersect",
+  "parent":{
+    "name":"Utilities",
+    "path":"folders/Willow/(System)/Utilities.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

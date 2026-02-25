@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteMixtape_Skip",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteMixtape_Skip",
+  "parent":{
+    "name":"Controls",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteMixtape/Controls.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

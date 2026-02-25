@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteMixtape_PingPong",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteMixtape_PingPong",
+  "parent":{
+    "name":"Controls",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteMixtape/Controls.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Willow",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Willow",
+  "parent":{
+    "name":"Willow",
+    "path":"folders/Willow.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

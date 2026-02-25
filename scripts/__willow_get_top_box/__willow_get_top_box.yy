@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__willow_get_top_box",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__willow_get_top_box",
+  "parent":{
+    "name":"Utilities",
+    "path":"folders/Willow/(System)/Utilities.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

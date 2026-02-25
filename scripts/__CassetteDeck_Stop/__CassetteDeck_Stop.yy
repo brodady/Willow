@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteDeck_Stop",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteDeck_Stop",
+  "parent":{
+    "name":"Controls",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteDeck/Controls.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

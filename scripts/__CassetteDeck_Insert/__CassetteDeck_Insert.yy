@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteDeck_Insert",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteDeck_Insert",
+  "parent":{
+    "name":"Setters",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteDeck/Setters.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

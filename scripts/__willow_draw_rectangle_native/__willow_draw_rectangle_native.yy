@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__willow_draw_rectangle_native",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__willow_draw_rectangle_native",
+  "parent":{
+    "name":"Drawing",
+    "path":"folders/Willow/(System)/Drawing.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

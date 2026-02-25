@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"CassetteConfig",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"CassetteConfig",
+  "parent":{
+    "name":"Cassette",
+    "path":"folders/Willow/Dependencies/Cassette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

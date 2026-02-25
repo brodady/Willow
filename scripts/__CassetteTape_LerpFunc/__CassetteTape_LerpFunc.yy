@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteTape_LerpFunc",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteTape_LerpFunc",
+  "parent":{
+    "name":"Setters",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteTape/Setters.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

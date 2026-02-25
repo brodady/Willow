@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteDeck_DetachChild",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteDeck_DetachChild",
+  "parent":{
+    "name":"Logic",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteDeck/Logic.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

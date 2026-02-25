@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteTape_HasTag",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteTape_HasTag",
+  "parent":{
+    "name":"Getters",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteTape/Getters.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

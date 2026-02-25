@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"WillowButton",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"WillowButton",
+  "parent":{
+    "name":"Components",
+    "path":"folders/Willow/Components.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

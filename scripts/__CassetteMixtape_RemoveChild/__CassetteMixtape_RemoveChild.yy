@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"__CassetteMixtape_RemoveChild",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"__CassetteMixtape_RemoveChild",
+  "parent":{
+    "name":"Logic",
+    "path":"folders/Willow/Dependencies/Cassette/(system)/__CassetteMixtape/Logic.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

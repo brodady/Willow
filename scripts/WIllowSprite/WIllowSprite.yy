@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"WIllowSprite",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"WIllowSprite",
+  "parent":{
+    "name":"Components",
+    "path":"folders/Willow/Components.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

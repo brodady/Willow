@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"WillowStyleTransitionBlock",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"WillowStyleTransitionBlock",
+  "parent":{
+    "name":"(System)",
+    "path":"folders/Willow/(System).yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
