@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"__willow_matrix_utilities",
   "parent":{
-    "name":"Utilities",
-    "path":"folders/Willow/(System)/Utilities.yy",
+    "name":"Drawing",
+    "path":"folders/Willow/(System)/Drawing.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

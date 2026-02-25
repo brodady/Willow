@@ -4,25 +4,27 @@
 /// @param {Real} _bw The base width.
 /// @param {Real} _bh The base height.
 /// @param {Struct} _r The render state struct from WillowStyle.
-function __willow_draw_rectangle_cleanshapes(_bx, _by, _bw, _bh, _r) {
-    CleanBatchBegin();
-
-    var _shape = CleanRectangle(_bx, _by, _bx + _bw, _by + _bh)
-        .Blend4(
-            _r.colours[0], _r.alpha[0], 
-            _r.colours[1], _r.alpha[1], 
-            _r.colours[2], _r.alpha[2], 
-            _r.colours[3], _r.alpha[3]
-        )
-        .Border4(
-            _r.borderWidth,
-            _r.borderColours[0], _r.borderAlpha[0], 
-            _r.borderColours[1], _r.borderAlpha[1], 
-            _r.borderColours[2], _r.borderAlpha[2], 
-            _r.borderColours[3], _r.borderAlpha[3]
-        )
-        .Rounding(_r.rounding);
+/// @func    __willow_draw_rectangle_cleanshapes(_x, _y, _w, _h, _render)
+function __willow_draw_rectangle_cleanshapes(_x, _y, _w, _h, _render) {
+    var _rounding = variable_struct_exists(_render, "rounding") ? _render.rounding : 0;
     
-    _shape.Draw(); 
-    CleanBatchEndDraw();
+    var _clampedR = min(_rounding, min(_w, _h) / 2);
+    
+    var _c1 = variable_struct_exists(_render, "colours") ? _render.colours[0] : c_white;
+    var _a1 = _render.alpha[0];
+    
+    var _rect = CleanRectangle(_x, _y, _x + _w, _y + _h)
+        .Rounding(_clampedR)
+        .Blend(_c1, _a1);
+        
+    if (variable_struct_exists(_render, "borderWidth") && _render.borderWidth > 0) {
+        var _bc = variable_struct_exists(_render, "borderColours") ? _render.borderColours[0] : c_white;
+        var _ba = (variable_struct_exists(_render, "borderAlpha") ? _render.borderAlpha[0] : 1) * _a1;
+        
+        // Pad the component's inner borders to counter the shader's AA erosion
+        var _aaPad = CleanAntialiasGet() ? 1.0 : 0;
+        _rect.Border(_render.borderWidth + _aaPad, _bc, _ba);
+    }
+    
+    _rect.Draw();
 }

@@ -636,9 +636,8 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
 
         var _clip = (__maxScrollX > 0 || __maxScrollY > 0 || (variable_struct_exists(__styleDefinition.struct, "clipContent") && __styleDefinition.struct.clipContent));
         var _prevMask = 0;
-        var _clipInset = 2; // Default inward clipping margin
+        var _clipInset = 2; 
         
-        // Push the stencil mask while the matrix is active, slightly inset to prevent anti-aliasing edge bleed.
         if (_clip && array_length(__children) > 0) {
             _prevMask = __willow_mask_push(
                 _dx + _clipInset, 
@@ -665,7 +664,6 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
             _i++;
         }
 
-        // Restore the matrix explicitly to erase the mask at the exact same coordinates
         if (_clip && _len > 0) {
             if (_matrixPushed) __willow_matrix_apply_transform(__render, __layout);
             __willow_mask_pop(
@@ -711,7 +709,7 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
 
         var _needsClip = (__maxScrollX > 0 || __maxScrollY > 0 || (variable_struct_exists(__styleDefinition.struct, "clipContent") && __styleDefinition.struct.clipContent));
         var _prevMask = 0;
-        var _clipInset = 2; // Default inward clipping margin
+        var _clipInset = 2;
         
         var _matrixPushed = __willow_matrix_apply_transform(__render, __layout);
         

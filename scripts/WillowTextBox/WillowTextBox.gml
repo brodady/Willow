@@ -549,7 +549,7 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
         if (__text == "" && !__inputState.__focus) {
             var _phDraw = __placeholder;
             if (!__isMultiline) _phDraw = string_replace_all(_phDraw, "\n", "");
-            var _phAlpha = _alpha * 0.4;
+            var _phAlpha = _alpha * 0.5;
 
             if (_sys.use_scribble) {
                 scribble(_phDraw).starting_format(_fontName, _colour).align(fa_left, _alignV).blend(_colour, _phAlpha)

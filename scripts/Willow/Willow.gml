@@ -212,7 +212,7 @@ function Willow() constructor {
         draw_clear_alpha(c_black, 0);
         draw_clear_stencil(0);
         
-        // CRITICAL FIX: Disable Depth Testing and Writing. 
+        // Disable Depth Testing and Writing. 
         // This prevents PASS 2 masks from being rejected by PASS 1 backgrounds sharing the same Z-depth.
         var _depth_prev = gpu_get_depth();
         var _ztest_prev = gpu_get_ztestenable();

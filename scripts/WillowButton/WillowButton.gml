@@ -191,15 +191,18 @@ function WillowButton(_label, _style = new WillowStyle(), _onClick = undefined) 
             var _c = c_black; 
             draw_set_alpha(__hoverAlpha * __render.alpha[0]);
             
+            var _clampedR = min(__render.rounding, _szW / 2, _szH / 2);
+            
             if (__WillowSystem().use_clean_shapes) {
                 CleanRectangle(_dx, _dy, _dx + _szW, _dy + _szH)
-                    .Rounding(__render.rounding)
+                    .Rounding(_clampedR)
                     .Blend(_c, draw_get_alpha())
                     .Draw();
             } else {
+                var _nOff = 1;
                 draw_set_colour(_c);
-                if (__render.rounding > 0) draw_roundrect_ext(_dx, _dy, _dx + _szW - 1, _dy + _szH - 1, __render.rounding, __render.rounding, false);
-                else draw_rectangle(_dx, _dy, _dx + _szW - 1, _dy + _szH - 1, false);
+                if (_clampedR > 0) draw_roundrect_ext(_dx + _nOff, _dy + _nOff, _dx + _szW - 1, _dy + _szH - 1, _clampedR, _clampedR, false);
+                else draw_rectangle(_dx + _nOff, _dy + _nOff, _dx + _szW - 1, _dy + _szH - 1, false);
             }
             
             draw_set_alpha(1);

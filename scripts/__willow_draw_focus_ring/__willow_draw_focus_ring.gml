@@ -10,6 +10,7 @@
 /// @param   {Real} _color
 /// @param   {Real} _alpha
 /// @return  {Undefined}
+/// @func    __willow_draw_focus_ring(_x, _y, _w, _h, _rounding, _thickness, _gap, _color, _alpha)
 function __willow_draw_focus_ring(_x, _y, _w, _h, _rounding, _thickness, _gap, _color, _alpha) {
     var _sys = __WillowSystem();
     
@@ -28,18 +29,20 @@ function __willow_draw_focus_ring(_x, _y, _w, _h, _rounding, _thickness, _gap, _
     var _inR  = _clampedRounding + _gap;
 
     if (_sys.use_clean_shapes) {
-        // CleanShapes natively handles hollow SDF borders without destroying surface alpha
+        // Counteract AA Erosion. The shader's Feather() eats ~1px total from the borders.
+        var _aaPad = CleanAntialiasGet() ? 1.0 : 0;
+        
         CleanRectangle(_outX1, _outY1, _outX2, _outY2)
-            .Blend(c_white, 0)
-            .Border(_thickness, _color, _alpha)
+            .Blend(_color, 0) 
+            .Border(_thickness + _aaPad, _color, _alpha)
             .Rounding(_outR)
             .Draw();
     } else {
-        // --- HARDWARE STENCIL FOCUS RING (Safe for UI Surfaces) ---
+        // - HARDWARE STENCIL FOCUS RING (Native)
         var _prevAlpha = draw_get_alpha();
         var _prevColor = draw_get_color();
+        var _nOff = 1; 
         
-        // 1. Get current stencil level (to respect existing masks)
         var _ref = 0;
         if (gpu_get_stencil_enable()) _ref = gpu_get_stencil_ref();
         else {
@@ -47,20 +50,15 @@ function __willow_draw_focus_ring(_x, _y, _w, _h, _rounding, _thickness, _gap, _
             gpu_set_stencil_ref(0);
         }
 
-        // 2. MASK OUT THE INNER GAP
-        // We draw the invisible inner gap and increment the stencil buffer to protect those pixels.
         gpu_set_colorwriteenable(false, false, false, false);
         gpu_set_stencil_func(cmpfunc_equal);
         gpu_set_stencil_ref(_ref);
         gpu_set_stencil_pass(stencilop_incr);
         
         draw_set_alpha(1);
-        if (_inR > 0) draw_roundrect_ext(_inX1, _inY1, _inX2 - 1, _inY2 - 1, _inR, _inR, false);
-        else draw_rectangle(_inX1, _inY1, _inX2 - 1, _inY2 - 1, false);
+        if (_inR > 0) draw_roundrect_ext(_inX1 + _nOff, _inY1 + _nOff, _inX2 - 1, _inY2 - 1, _inR, _inR, false);
+        else draw_rectangle(_inX1 + _nOff, _inY1 + _nOff, _inX2 - 1, _inY2 - 1, false);
 
-        // 3. DRAW OUTER RING 
-        // We draw the full outer boundary, but because cmpfunc_equal requires the 
-        // stencil to match _ref, it is rejected inside the gap we just protected.
         gpu_set_colorwriteenable(true, true, true, true);
         gpu_set_stencil_func(cmpfunc_equal);
         gpu_set_stencil_ref(_ref);
@@ -68,21 +66,18 @@ function __willow_draw_focus_ring(_x, _y, _w, _h, _rounding, _thickness, _gap, _
         
         draw_set_color(_color);
         draw_set_alpha(_alpha);
-        if (_outR > 0) draw_roundrect_ext(_outX1, _outY1, _outX2 - 1, _outY2 - 1, _outR, _outR, false);
-        else draw_rectangle(_outX1, _outY1, _outX2 - 1, _outY2 - 1, false);
+        if (_outR > 0) draw_roundrect_ext(_outX1 + _nOff, _outY1 + _nOff, _outX2 - 1, _outY2 - 1, _outR, _outR, false);
+        else draw_rectangle(_outX1 + _nOff, _outY1 + _nOff, _outX2 - 1, _outY2 - 1, false);
 
-        // 4. CLEAN UP THE MASK
-        // We redraw the inner gap, decrementing the stencil back to its previous state.
         gpu_set_colorwriteenable(false, false, false, false);
         gpu_set_stencil_func(cmpfunc_equal);
         gpu_set_stencil_ref(_ref + 1);
         gpu_set_stencil_pass(stencilop_decr);
         
         draw_set_alpha(1);
-        if (_inR > 0) draw_roundrect_ext(_inX1, _inY1, _inX2 - 1, _inY2 - 1, _inR, _inR, false);
-        else draw_rectangle(_inX1, _inY1, _inX2 - 1, _inY2 - 1, false);
+        if (_inR > 0) draw_roundrect_ext(_inX1 + _nOff, _inY1 + _nOff, _inX2 - 1, _inY2 - 1, _inR, _inR, false);
+        else draw_rectangle(_inX1 + _nOff, _inY1 + _nOff, _inX2 - 1, _inY2 - 1, false);
 
-        // 5. RESTORE STATE
         gpu_set_colorwriteenable(true, true, true, true);
         gpu_set_stencil_func(cmpfunc_equal);
         gpu_set_stencil_ref(_ref);
