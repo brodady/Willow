@@ -24,7 +24,7 @@ function WillowThemes() constructor {
     static Light        = __WillowThemeLight;
     static Valentine    = __WillowThemeValentine;
     static Winter       = __WillowThemeWinter;
-    static Monokai      = __WillowThemeMonokai();
+    static Monokai      = __WillowThemeMonokai;
 
     /// @desc Static Registry for easy iteration
     static All = [
