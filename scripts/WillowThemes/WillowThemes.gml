@@ -24,6 +24,7 @@ function WillowThemes() constructor {
     static Light        = __WillowThemeLight;
     static Valentine    = __WillowThemeValentine;
     static Winter       = __WillowThemeWinter;
+    static Monokai      = __WillowThemeMonokai();
 
     /// @desc Static Registry for easy iteration
     static All = [
@@ -47,7 +48,8 @@ function WillowThemes() constructor {
         __WillowThemeForest,
         __WillowThemeLight,
         __WillowThemeValentine,
-        __WillowThemeWinter
+        __WillowThemeWinter,
+        __WillowThemeMonokai
     ];
     #endregion
 }
@@ -313,5 +315,33 @@ function __WillowThemeWinter() : __WillowThemeTemplate() constructor {
         warning: #f8d77e, warning_content: #3e3620, error: #ff9d89, error_content: #402722
     };
     radius = { box: 16, field: 8, selector: 16, btn: 16 };
+}
+
+function __WillowThemeMonokai() : __WillowThemeTemplate() constructor {
+    name = "monokai"; color_scheme = "dark";
+    color = {
+        base_100: #282c34,
+        base_200: #21252b, 
+        base_300: #181a1f, 
+        base_content: #abb2bf, 
+        primary: #c678dd, 
+        primary_content: #282c34,
+        secondary: #e06c75,
+        secondary_content: #282c34,
+        accent: #56b6c2, 
+        accent_content: #282c34,
+        neutral: #3e4451, 
+        neutral_content: #abb2bf,
+        info: #61afef,    
+        info_content: #000000,
+        success: #98c379, 
+        success_content: #000000,
+        warning: #e5c07b,
+        warning_content: #000000,
+        error: #e06c75,
+        error_content: #ffffff
+    };
+    
+    radius = { box: 8, field: 4, selector: 8, btn: 8 };
 }
 #endregion
