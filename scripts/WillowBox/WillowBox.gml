@@ -43,6 +43,9 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
     __allowScroll = true;
     __scrollX = 0; __scrollY = 0;
     __maxScrollX = 0; __maxScrollY = 0;
+    __isScrollingV = false; 
+    __isScrollingH = false; 
+    __scrollGrabOffset = 0; 
 
     // - EVENTS & TRANSITIONS
     __eventState = {
@@ -408,11 +411,37 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
     
     /// @ignore
     static __getCursorStyle = function(_mx, _my) {
+        // 1. Resizing check (Priority 1)
         if (__isResizing || ((__resizableH || __resizableV) && __isMouseInResizeHandle(_mx, _my))) {
             if (__resizableH && __resizableV) return cr_size_nwse;
             if (__resizableV) return cr_size_ns;
             if (__resizableH) return cr_size_we;
         }
+
+        // 2. Scrollbar check (Priority 2)
+        if (__isScrollingV || __isScrollingH) return cr_handpoint;
+
+        if (__maxScrollY > 0 || __maxScrollX > 0) {
+            var _dx = getDrawX();
+            var _dy = getDrawY();
+            var _inset = variable_struct_exists(__render, "rounding") ? ceil(__render.rounding * 0.5) + 4 : 2;
+
+            // Check Vertical Track
+            if (__maxScrollY > 0) {
+                var _sx1 = _dx + __layout.width - 10 - _inset; 
+                var _sx2 = _dx + __layout.width - _inset;
+                if (point_in_rectangle(_mx, _my, _sx1, _dy + _inset, _sx2, _dy + __layout.height - _inset)) return cr_handpoint;
+            }
+
+            // Check Horizontal Track
+            if (__maxScrollX > 0) {
+                var _sy1 = _dy + __layout.height - 10 - _inset;
+                var _sy2 = _dy + __layout.height - _inset;
+                if (point_in_rectangle(_mx, _my, _dx + _inset, _sy1, _dx + __layout.width - _inset, _sy2)) return cr_handpoint;
+            }
+        }
+
+        // 3. Default component cursor (Handpoint for buttons, IBeam for TextBoxes, etc.)
         return __cursorStyle;
     };
 
@@ -450,7 +479,11 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
                     var _isUp = (_type == WILLOW_EVENT.scrollUp);
                     var _spd = WILLOW_SCROLL_SPEED;
                     
-                    if (keyboard_check(vk_shift) && __maxScrollX > 0) {
+                    // If we aren't multiline and have horizontal overflow, default to X scroll
+                    var _isSingleLine = (variable_struct_exists(self, "__isMultiline") && !__isMultiline);
+                    var _forceHorizontal = _isSingleLine && (__maxScrollX > 0);
+                    
+                    if ((keyboard_check(vk_shift) || _forceHorizontal) && __maxScrollX > 0) {
                         var _old = __scrollX;
                         __scrollX = _isUp ? max(0, __scrollX - _spd) : min(__maxScrollX, __scrollX + _spd);
                         if (__scrollX != _old) _consumed = true;
@@ -534,6 +567,8 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
     /// @desc    Core layout validation, scrolling, and interaction processing event.
     /// @return  {Undefined}
     static step = function() {
+        if (__layout == undefined) return;
+            
         var _len = array_length(__children);
 
         // - RESIZE & SCROLL BOUNDARY CALCULATION
@@ -607,6 +642,65 @@ function WillowBox(_name, _style = new WillowStyle(), _layoutDir = flexpanel_dir
             }
             return;
         }
+        
+        var _dx = getDrawX();
+        var _dy = getDrawY();
+    
+        // - SCROLLBAR INTERACTION LOGIC
+        if ((__maxScrollY > 0 || __maxScrollX > 0) && !__isResizing) {
+            var _inset = variable_struct_exists(__render, "rounding") ? ceil(__render.rounding * 0.5) + 4 : 2;
+            
+            // Vertical Drag Check
+            if (__maxScrollY > 0) {
+                var _trackH = __layout.height - (_inset * 2) - (__maxScrollX > 0 ? 8 : 0);
+                var _thumbH = max(20, (__layout.height / (__layout.height + __maxScrollY)) * _trackH);
+                var _thumbY = _dy + _inset + (__scrollY / __maxScrollY) * (_trackH - _thumbH);
+                var _sx1 = _dx + __layout.width - 6 - _inset;
+                var _sx2 = _dx + __layout.width - 2 - _inset;
+    
+                if (device_mouse_check_button_pressed(0, mb_left) && point_in_rectangle(_mx, _my, _sx1 - 4, _thumbY, _sx2 + 4, _thumbY + _thumbH)) {
+                    __isScrollingV = true;
+                    __scrollGrabOffset = _my - _thumbY;
+                }
+            }
+    
+            // Horizontal Drag Check
+            if (__maxScrollX > 0 && !__isScrollingV) {
+                var _trackW = __layout.width - (_inset * 2) - (__maxScrollY > 0 ? 8 : 0);
+                var _thumbW = max(20, (__layout.width / (__layout.width + __maxScrollX)) * _trackW);
+                var _thumbX = _dx + _inset + (__scrollX / __maxScrollX) * (_trackW - _thumbW);
+                var _sy1 = _dy + __layout.height - 6 - _inset;
+                var _sy2 = _dy + __layout.height - 2 - _inset;
+    
+                if (device_mouse_check_button_pressed(0, mb_left) && point_in_rectangle(_mx, _my, _thumbX, _sy1 - 4, _thumbX + _thumbW, _sy2 + 4)) {
+                    __isScrollingH = true;
+                    __scrollGrabOffset = _mx - _thumbX;
+                }
+            }
+        }
+    
+        // Process Dragging
+        if (__isScrollingV || __isScrollingH) {
+            if (!device_mouse_check_button(0, mb_left)) {
+                __isScrollingV = false;
+                __isScrollingH = false;
+            } else {
+                var _inset = variable_struct_exists(__render, "rounding") ? ceil(__render.rounding * 0.5) + 4 : 2;
+                if (__isScrollingV) {
+                    var _trackH = __layout.height - (_inset * 2) - (__maxScrollX > 0 ? 8 : 0);
+                    var _thumbH = max(20, (__layout.height / (__layout.height + __maxScrollY)) * _trackH);
+                    var _relativeY = clamp(_my - __scrollGrabOffset - (_dy + _inset), 0, _trackH - _thumbH);
+                    __scrollY = (_relativeY / (_trackH - _thumbH)) * __maxScrollY;
+                } else {
+                    var _trackW = __layout.width - (_inset * 2) - (__maxScrollY > 0 ? 8 : 0);
+                    var _thumbW = max(20, (__layout.width / (__layout.width + __maxScrollX)) * _trackW);
+                    var _relativeX = clamp(_mx - __scrollGrabOffset - (_dx + _inset), 0, _trackW - _thumbW);
+                    __scrollX = (_relativeX / (_trackW - _thumbW)) * __maxScrollX;
+                }
+            }
+            return; // Prevent other interactions while scrolling
+        }
+        
 
         // Standard Hover Cursor (Only runs if NOT resizing)
         if (__eventState.hover && !mouse_check_button(mb_left)) {

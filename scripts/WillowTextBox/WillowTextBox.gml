@@ -675,8 +675,32 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
     #region EVENT BINDINGS
     
     onClick(function() {
-        if (__isResizing || __isMouseInResizeHandle(window_mouse_get_x(), window_mouse_get_y())) return;
+        var _mx = window_mouse_get_x();
+        var _my = window_mouse_get_y();
         
+        if (__isResizing || __isMouseInResizeHandle(_mx, _my)) return;
+        
+        if (__maxScrollY > 0 || __maxScrollX > 0) {
+            var _dx = getDrawX();
+            var _dy = getDrawY();
+            var _inset = variable_struct_exists(__render, "rounding") ? ceil(__render.rounding * 0.5) + 4 : 2;
+            
+            // Hit detection for Vertical Scrollbar
+            if (__maxScrollY > 0) {
+                var _sx1 = _dx + __layout.width - 10 - _inset;
+                var _sx2 = _dx + __layout.width - _inset;
+                if (point_in_rectangle(_mx, _my, _sx1, _dy + _inset, _sx2, _dy + __layout.height - _inset)) return;
+            }
+            
+            // Hit detection for Horizontal Scrollbar
+            if (__maxScrollX > 0) {
+                var _sy1 = _dy + __layout.height - 10 - _inset;
+                var _sy2 = _dy + __layout.height - _inset;
+                if (point_in_rectangle(_mx, _my, _dx + _inset, _sy1, _dx + __layout.width - _inset, _sy2)) return;
+            }
+        }
+        
+        // - NORMAL TEXTBOX LOGIC
         __inputState.__focus = true; 
         __inputState.__isDragging = true; 
         __inputState.__selectMode = WILLOW_SELECT_MODE.REGULAR;
@@ -695,7 +719,16 @@ function WillowTextBox(_name, _placeholder = "Enter text...", _style = new Willo
     });
 
     onDoubleClick(function() {
+        var _mx = window_mouse_get_x();
+        var _my = window_mouse_get_y();
+        
         if (__isResizing || __text == "") return;
+        
+        // We skip double-click selection if the mouse is in the far right or bottom gutters
+        var _inset = variable_struct_exists(__render, "rounding") ? ceil(__render.rounding * 0.5) + 4 : 2;
+        if (_mx > getDrawX() + __layout.width - 12 - _inset) return;
+        if (_my > getDrawY() + __layout.height - 12 - _inset) return;
+
         var _idx = __getCursorIndexFromMouse();
         
         // Find word boundaries
